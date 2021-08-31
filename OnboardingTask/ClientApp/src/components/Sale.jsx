@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 
 
-export class Sale extends React.Component {
+export default class Sale extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -56,11 +56,11 @@ export class Sale extends React.Component {
             .then(result => {
 
                 this.setState({ saleList: result, editSaleModal: false }, () => { console.log(this.state.saleList) });
-            },
-                (error) => {
-                    console.log(error);
-                }
-            )
+            })
+            .catch((error) => {
+                console.log(error)
+            });
+            
     }
 
 
@@ -69,33 +69,33 @@ export class Sale extends React.Component {
         axios.get("api/Customers").then(response => response.data)
             .then(result => {
                 this.setState({ customerListData: result });
-            },
-                (error) => {
-                    console.log(error);
-                }
-            )
+            }).catch
+            ((error) => {
+                console.log(error)
+            }
+            );
     }
 
     getProductData() {
         axios.get('api/Products').then(res => res.data)
             .then(result => {
                 this.setState({ productListData: result });
-            },
-                (error) => {
-                    console.log(error);
+            })
+            .catch((error) => {
+                    console.log(error)
                 }
-            )
+            );
     }
 
     getStoreData() {
         axios.get('api/Stores').then(response => response.data)
             .then(result => {
                 this.setState({ storeListData: result });
-            },
-                (error) => {
-                    console.log(error);
-                }
-            )
+            })
+            .catch((error) => {
+                console.log(error)
+            }
+            );
     }
 
     handleDateChange = e => {
@@ -103,86 +103,97 @@ export class Sale extends React.Component {
             date: e.target.value
         })
     }
+    handleCustomerDataChange = (e) => {
+        this.setState({
+            CustomerData: e.target.value,
+        });
+    };
+    
 
-    handleCustomerDataChange = (e, data) => {
-        console.log(`Customer id=${data.value} `);
-        this.setState({ selectedCustomer: data.value });
-    }
+    handleProducDataChange = (e) => {
+        this.setState({
+            ProductData: e.target.value,
+        });
+    };
+    
+    handleStoreDataChange = (e) => {
+        this.setState({
+            StoreData: e.target.value,
+        });
+    };
+    
 
 
-    handleProductDataChange = (e, data) => {
-        console.log(`Product id=${data.value} `);
-        this.setState({ selectedProduct: data.value });
-    }
-
-    handleStoreDataChange = (e, data) => {
-        console.log(`Store id=${data.value} `);
-        this.setState({ selectedStore: data.value });
-    }
-
-
-    getSaleIndividualData(id) {
-        axios.get('api/Sales/' + id).then(response => {
-            const newSaleList = this.state.saleList.concat(response.data);
-            this.setState({ saleList: newSaleList, newSaleModal: false });
-        },
-            (error) => {
-                console.log(error);
-            })
-    }
+   
 
     addSale(e) {
-
         e.preventDefault();
         const salesToAdd = {
             DateSold: this.state.date,
             customerId: this.state.selectedCustomer,
             productId: this.state.selectedProduct,
-            storeId: this.state.selectedStore
+            storeId: this.state.selectedStore,
         };
-
-        console.log(salesToAdd);
-
-        axios.post('api/Sales', salesToAdd)
-            .then(res => {
-
+        axios
+            .post("api/Sales", salesToAdd)
+            .then((res) => {
                 console.log(res);
 
                 console.log(res.data);
-
-                this.getSaleIndividualData(res.data.id);
+                const newSaleList = this.state.saleList.concat(res.data);
+                this.setState({
+                    saleList: newSaleList,
+                    newSaleModal: false,
+                });
             })
-            .catch(err => {
-
-                console.log(err)
+            .catch((err) => {
+                console.log(err);
             });
-
-
     }
-
-
-    updateSale() {
-
-        const salesToUpdate = {
+    updateSale = async () => {
+        // console.log('id', this.state.id);
+        const user = {
             id: this.state.id,
             DateSold: this.state.date,
             customerId: this.state.selectedCustomer,
             productId: this.state.selectedProduct,
-            storeId: this.state.selectedStore
+            storeId: this.state.selectedStore,
         };
-        console.log(salesToUpdate);
+        console.log(user);
 
-        axios.put('api/Sales/' + this.state.id, salesToUpdate)
-            .then(res => {
+        await axios
+            .put("api/Sales/" + this.state.id, user)
+            .then((res) => {
                 console.log(res);
+                console.log(res.data);
+                let saleList = this.state.saleList;
+                const updatedSaleList = saleList.map((sale) => {
+                    if (sale.id === this.state.id) {
+                        sale.dateSold = this.state.date;
+                        sale.customer = this.state.customer;
+                        sale.product = this.state.product;
+                        sale.store = this.state.store;
 
-                if (res.status === 200) {
-                    console.log(res.data);
-                    this.getSaleData();
-                }
+                    }
+                    return sale;
+                });
+
+                this.setState({
+                    id: this.state.id,
+                    DateSold: this.state.date,
+                    customerId: this.state.selectedCustomer,
+                    productId: this.state.selectedProduct,
+                    storeId: this.state.selectedStore,
+                    editSaleModal: false,
+                    saleList: updatedSaleList,
+                });
             })
-            .catch((error) => console.log(error));
-    }
+            .catch((error) => console.log(error.response.request._response));
+    };
+
+
+
+   
 
     initEditForm(sale) {
         this.setState({
@@ -278,7 +289,7 @@ export class Sale extends React.Component {
                             color="green">New Sale</Button>
                         <Modal
                             style={{ height: "auto", top: "auto", left: "auto", bottom: "auto", right: "auto" }}
-                            size="tiny"
+                            size="small"
                             open={this.state.newSaleModal}
                             onOpen={() => this.setState({ newSaleModal: true })}
 

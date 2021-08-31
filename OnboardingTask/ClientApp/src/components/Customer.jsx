@@ -170,7 +170,7 @@ export class Customer extends React.Component {
                 column: clickedColumn,
                 customerList: _.sortBy(customerList, [clickedColumn]),
                 direction: "ascending",
-                url: this.state.url === "caret down" ? "caret up" : "caret down",
+                url: this.state.url == "caret down" ? "caret up" : "caret down",
             });
 
             return;
@@ -179,7 +179,7 @@ export class Customer extends React.Component {
         this.setState({
             customerList: customerList.reverse(),
             direction: direction === "ascending" ? "descending" : "ascending",
-            url: this.state.url === "caret down" ? "caret up" : "caret down",
+            url: this.state.url == "caret down" ? "caret up" : "caret down",
         });
     };
 
@@ -260,7 +260,7 @@ export class Customer extends React.Component {
                                         sorted={
                                             this.state.column === "name" ? this.state.direction : null
                                         }
-                                        onClick={() => this.handleSort("name")}
+                                        onClick={ this.handleSort("name")}
                                     >
                                         Name
                     <span>
@@ -273,7 +273,7 @@ export class Customer extends React.Component {
                                                 ? this.state.direction
                                                 : null
                                         }
-                                        onClick={() => this.handleSort("address")}
+                                        onClick={ this.handleSort("address")}
                                     >
                                         Address
                     <span>
